@@ -77,6 +77,63 @@ async function getProduct() {
     }
 }
 
+async function populateProductDropdown() {
+    try {
+        if (!contract) {
+            return showStatus('updateStatus', 'Contract not initialized. Please configure it first.', true);
+        }
+
+        showStatus('updateStatus', 'Loading products...', false);
+        const count = await contract.methods.getTotalProducts().call();
+        const selectElement = document.getElementById('updateProductSelect');
+        
+        // Clear existing options except the first one
+        selectElement.innerHTML = '<option value="">-- Select a Product --</option>';
+        
+        for (let i = 1; i <= count; i++) {
+            try {
+                const product = await contract.methods.getProduct(i).call();
+                if (product[4]) { // Check if product exists
+                    const option = document.createElement('option');
+                    option.value = i;
+                    option.textContent = `ID: ${i} - ${product[1]} (Qty: ${product[2]}, Price: ${product[3]})`;
+                    selectElement.appendChild(option);
+                }
+            } catch (error) {
+                // Skip deleted products
+            }
+        }
+        
+        showStatus('updateStatus', 'Products loaded successfully!', false);
+    } catch (error) {
+        showStatus('updateStatus', 'Error loading products: ' + error.message, true);
+    }
+}
+
+async function loadProductForUpdate() {
+    const productId = document.getElementById('updateProductSelect').value;
+    
+    if (!productId) {
+        clearFields('updateId', 'updateName', 'updateQuantity', 'updatePrice');
+        return;
+    }
+
+    try {
+        const product = await contract.methods.getProduct(productId).call();
+        
+        // Prefill the form fields
+        document.getElementById('updateId').value = product[0];
+        document.getElementById('updateName').value = product[1];
+        document.getElementById('updateQuantity').value = product[2];
+        document.getElementById('updatePrice').value = product[3];
+        
+        showStatus('updateStatus', 'Product loaded! You can now edit the fields.', false);
+    } catch (error) {
+        showStatus('updateStatus', 'Error loading product: ' + error.message, true);
+        clearFields('updateId', 'updateName', 'updateQuantity', 'updatePrice');
+    }
+}
+
 async function updateProduct() {
     const [id, name, quantity, price] = getValues('updateId', 'updateName', 'updateQuantity', 'updatePrice');
     if (!id || !name || !quantity || !price) return showStatus('updateStatus', 'Please fill all fields!', true);
@@ -87,6 +144,7 @@ async function updateProduct() {
         showStatus('updateStatus', 'Product updated successfully!', false);
         setTimeout(fetchHistoryFromContract, 2000);
         clearFields('updateId', 'updateName', 'updateQuantity', 'updatePrice');
+        document.getElementById('updateProductSelect').value = '';
     } catch (error) {
         showStatus('updateStatus', 'Error: ' + error.message, true);
     }
