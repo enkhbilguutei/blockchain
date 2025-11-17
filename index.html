@@ -27,6 +27,21 @@
             <div id="configStatus" class="status"></div>
         </div>
 
+        <!-- Import Products from CSV -->
+        <div class="section">
+            <h2>Import Products from CSV</h2>
+            <p style="font-size: 13px; color: #666; margin-bottom: 15px;">
+                Upload a CSV file with columns: <strong>Product Name, Quantity, Price per Unit</strong>
+            </p>
+            <div class="form-group">
+                <label>Select CSV File:</label>
+                <input type="file" id="csvFile" accept=".csv" style="padding: 8px;">
+            </div>
+            <button onclick="importProductsFromCSV()">Import Products</button>
+            <div id="importStatus" class="status"></div>
+            <div id="importPreview" style="margin-top: 15px;"></div>
+        </div>
+
         <!-- Add Product -->
         <div class="section">
             <h2>Add New Product</h2>
@@ -122,7 +137,11 @@
             </div>
             <div style="margin-bottom: 15px;">
                 <button onclick="fetchHistoryFromContract()" style="background-color: #3498db; margin-top: 0;">Refresh History</button>
+                <button onclick="exportProductsToCSV()" style="background-color: #27ae60;">Export Products CSV</button>
+                <button onclick="exportTransactionHistoryToCSV()" style="background-color: #2980b9;">Export History CSV</button>
+                <button onclick="exportAllDataToCSV()" style="background-color: #8e44ad;">Export All Data</button>
             </div>
+            <div id="exportStatus" class="status"></div>
             <div id="historyList" class="product-list">
                 <p>No transactions yet. Add, update, or delete a product to see history.</p>
             </div>
